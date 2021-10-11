@@ -1,11 +1,11 @@
-use clap::App;
+use clap::{App, Arg, ArgMatches, SubCommand};
 
 fn main() {
     println!("Hello, world! Let's be good friends.");
 
     let subcommands = vec![
-        list::as_subcommand(),
-        add::as_subcommand()
+        ListFriends::as_subcommand(),
+        AddFriend::as_subcommand()
     ];
 
     let app = App::new("Friend Grow")
@@ -15,31 +15,37 @@ fn main() {
         .subcommands(subcommands);
     let matches = app.get_matches();
 
-    if let Some(_) = matches.subcommand_matches("list") {
-        list::execute();
+    if let Some(matches) = matches.subcommand_matches("list") {
+        ListFriends::execute(matches);
     }
     if let Some(matches) = matches.subcommand_matches("add") {
-        add::execute(matches);
+        AddFriend::execute(matches);
     }
 }
 
-mod list {
-    use clap::{App, SubCommand};
+pub trait Command {
+    fn as_subcommand<'a, 'b>() -> App<'a, 'b>;
 
-    pub fn as_subcommand<'a, 'b>() -> App<'a, 'b> {
+    fn execute(matches: &ArgMatches);
+}
+
+struct ListFriends {}
+
+impl Command for ListFriends {
+    fn as_subcommand<'a, 'b>() -> App<'a, 'b> {
         SubCommand::with_name("list")
             .about("List all of your friends")
     }
 
-    pub fn execute() {
+    fn execute(_: &ArgMatches) {
         println!("Listing all of your friends...");
     }
 }
 
-mod add {
-    use clap::{App, Arg, ArgMatches, SubCommand};
+struct AddFriend {}
 
-    pub fn as_subcommand<'a, 'b>() -> App<'a, 'b> {
+impl Command for AddFriend {
+    fn as_subcommand<'a, 'b>() -> App<'a, 'b> {
         SubCommand::with_name("add")
             .about("Add a friend")
             .arg(Arg::with_name("friend")
@@ -47,7 +53,7 @@ mod add {
                 .required(true))
     }
 
-    pub fn execute(matches: &ArgMatches) {
+    fn execute(matches: &ArgMatches) {
         println!("Adding a friend {}...", matches.value_of("friend").unwrap());
     }
 }
