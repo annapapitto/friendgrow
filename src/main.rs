@@ -15,15 +15,17 @@ fn main() {
         .subcommands(subcommands);
     let matches = app.get_matches();
 
-    if let Some(matches) = matches.subcommand_matches("list") {
+    if let Some(matches) = matches.subcommand_matches(ListFriends::ID) {
         ListFriends::execute(matches);
     }
-    if let Some(matches) = matches.subcommand_matches("add") {
+    if let Some(matches) = matches.subcommand_matches(AddFriend::ID) {
         AddFriend::execute(matches);
     }
 }
 
 pub trait Command {
+    const ID: &'static str;
+
     fn as_subcommand<'a, 'b>() -> App<'a, 'b>;
 
     fn execute(matches: &ArgMatches);
@@ -32,8 +34,10 @@ pub trait Command {
 struct ListFriends {}
 
 impl Command for ListFriends {
+    const ID: &'static str = "list";
+
     fn as_subcommand<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("list")
+        SubCommand::with_name(Self::ID)
             .about("List all of your friends")
     }
 
@@ -45,8 +49,10 @@ impl Command for ListFriends {
 struct AddFriend {}
 
 impl Command for AddFriend {
+    const ID: &'static str = "add";
+
     fn as_subcommand<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("add")
+        SubCommand::with_name(Self::ID)
             .about("Add a friend")
             .arg(Arg::with_name("friend")
                 .help("Name of the friend")
