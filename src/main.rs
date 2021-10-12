@@ -1,65 +1,42 @@
-use clap::{App, Arg, ArgMatches, SubCommand};
+use structopt::StructOpt;
 
 fn main() {
     println!("Hello, world! Let's be good friends.");
 
-    let subcommands = vec![
-        ListFriends::as_subcommand(),
-        AddFriend::as_subcommand()
-    ];
+    let opt = Friendgrow::from_args();
+    execute_subcommand(opt);
+}
 
-    let app = App::new("Friend Grow")
-        .version("0.1")
-        .author("annapapitto")
-        .about("Let your friendships grow")
-        .subcommands(subcommands);
-    let matches = app.get_matches();
+#[derive(StructOpt)]
+#[structopt(
+    name = "Friend Grow",
+    about = "Let your friendships grow",
+    version = "0.1",
+    author = "annapapitto"
+)]
+enum Friendgrow {
+    #[structopt(name = "list", help = "List all of your friends")]
+    ListFriends {},
 
-    if let Some(matches) = matches.subcommand_matches(ListFriends::ID) {
-        ListFriends::execute(matches);
-    }
-    if let Some(matches) = matches.subcommand_matches(AddFriend::ID) {
-        AddFriend::execute(matches);
+    #[structopt(name = "add", help = "Add a friend")]
+    AddFriend { friend: String },
+}
+
+fn execute_subcommand(opt: Friendgrow) {
+    match opt {
+        Friendgrow::ListFriends {} => {
+            list_friends();
+        }
+        Friendgrow::AddFriend { friend } => {
+            add_friend(friend);
+        }
     }
 }
 
-pub trait Command {
-    const ID: &'static str;
-
-    fn as_subcommand<'a, 'b>() -> App<'a, 'b>;
-
-    fn execute(matches: &ArgMatches);
+fn list_friends() {
+    println!("Listing all of your friends...");
 }
 
-struct ListFriends {}
-
-impl Command for ListFriends {
-    const ID: &'static str = "list";
-
-    fn as_subcommand<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name(Self::ID)
-            .about("List all of your friends")
-    }
-
-    fn execute(_: &ArgMatches) {
-        println!("Listing all of your friends...");
-    }
-}
-
-struct AddFriend {}
-
-impl Command for AddFriend {
-    const ID: &'static str = "add";
-
-    fn as_subcommand<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name(Self::ID)
-            .about("Add a friend")
-            .arg(Arg::with_name("friend")
-                .help("Name of the friend")
-                .required(true))
-    }
-
-    fn execute(matches: &ArgMatches) {
-        println!("Adding a friend {}...", matches.value_of("friend").unwrap());
-    }
+fn add_friend(friend: String) {
+    println!("Adding a friend {}...", friend);
 }
