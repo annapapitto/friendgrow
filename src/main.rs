@@ -1,19 +1,18 @@
 use rusqlite::{params, Connection, Result};
 use structopt::StructOpt;
 
+const DEFAULT_FREQ_DAYS: i32 = 100;
+
 fn main() -> Result<()> {
-    println!("Hello, world! Let's be good friends.");
+    let opt = FriendGrow::from_args();
 
-    let opt = Friendgrow::from_args();
-
-    // TODO make this an arg
-    let conn = Connection::open("~/friends/friends.db")?;
+    let conn = Connection::open("friends.db")?;
     conn.execute(
         "CREATE TABLE IF NOT EXISTS friend (
             id integer primary key,
             name text not null unique,
-            freq integer,
-            last_seen text,
+            freq_days integer,
+            last_seen text
         )",
         [],
     )?;
@@ -24,12 +23,12 @@ fn main() -> Result<()> {
 
 #[derive(StructOpt)]
 #[structopt(
-    name = "Friend Grow",
+    name = "FriendGrow",
     about = "Let your friendships grow",
     version = "0.1",
     author = "annapapitto"
 )]
-enum Friendgrow {
+enum FriendGrow {
     #[structopt(name = "list", help = "List all of your friends")]
     ListFriends {},
 
@@ -41,29 +40,44 @@ enum Friendgrow {
 struct Friend {
     id: i32,
     name: String,
-    freq: u8,             // TODO try with u8
-    last_hangout: String, // TODO should this be Option if no 'not null'?
+    freq_days: i32,
+    last_seen: Option<String>,
 }
 
-fn execute_subcommand(opt: Friendgrow, conn: Connection) -> Result<()> {
+fn execute_subcommand(opt: FriendGrow, conn: Connection) -> Result<()> {
     match opt {
-        Friendgrow::ListFriends {} => {
+        FriendGrow::ListFriends {} => {
             return list_friends(conn);
         }
-        Friendgrow::AddFriend { friend } => {
+        FriendGrow::AddFriend { friend } => {
             return add_friend(friend, conn);
         }
     }
 }
 
 fn list_friends(conn: Connection) -> Result<()> {
-    println!("Listing all of your friends...");
-    let names = conn.execute("SELECT name FROM friend", [])?;
-    println!("names: {:?}", names);
+    let mut stmt = conn.prepare("SELECT id, name, freq_days, last_seen FROM friend")?;
+    let rows = stmt.query_map([], |row| {
+        Ok(Friend {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            freq_days: row.get(2)?,
+            last_seen: row.get(3)?,
+        })
+    })?;
+
+    for friend_result in rows {
+        println!("{:?}", friend_result);
+    }
+
     Ok(())
 }
 
 fn add_friend(friend: String, conn: Connection) -> Result<()> {
-    println!("Adding a friend {}...", friend);
+    conn.execute(
+        "INSERT INTO friend (name, freq_days) values (?1, ?2)",
+        params![friend, DEFAULT_FREQ_DAYS],
+    )?;
+
     Ok(())
 }
