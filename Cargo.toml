@@ -4,5 +4,7 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
+diesel = { version = "1.4", features = [ "sqlite" ] }
+dotenv = "0.15"
 rusqlite = "0.26"
 structopt = "0.3"
