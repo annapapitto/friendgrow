@@ -56,7 +56,7 @@ fn execute_subcommand(opt: FriendGrow, conn: Connection) -> Result<()> {
 }
 
 fn list_friends(conn: Connection) -> Result<()> {
-    let mut stmt = conn.prepare("SELECT id, name, freq_days, last_seen FROM friend")?;
+    let mut stmt = conn.prepare("SELECT id, name, freq_days, last_seen FROM friends")?;
     let rows = stmt.query_map([], |row| {
         Ok(Friend {
             id: row.get(0)?,
@@ -75,7 +75,7 @@ fn list_friends(conn: Connection) -> Result<()> {
 
 fn add_friend(friend: String, conn: Connection) -> Result<()> {
     conn.execute(
-        "INSERT INTO friend (name, freq_days) values (?1, ?2)",
+        "INSERT INTO friends (name, freq_days) values (?1, ?2)",
         params![friend, DEFAULT_FREQ_DAYS],
     )?;
 
