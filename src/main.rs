@@ -1,27 +1,34 @@
-use rusqlite::{params, Connection, Result};
+// TODO what are these for?
+#[macro_use]
+extern crate diesel;
+#[macro_use]
+extern crate diesel_migrations;
+//#[macro_use] // TODO do you need one of these per 'extern crate'?
+//extern crate dotenv; // TODO why was this introduced? do i need it in db.rs?
+
+// TODO why do I need models and schema if I don't use them? do the examples use them here?
+pub mod commands;
+pub mod db;
+pub mod models;
+pub mod schema;
+
+use crate::commands::*;
+use diesel::prelude::*;
+use diesel_migrations::embed_migrations;
 use structopt::StructOpt;
 
-const DEFAULT_FREQ_DAYS: i32 = 100;
+embed_migrations!();
 
-fn main() -> Result<()> {
+fn main() {
     let opt = FriendGrow::from_args();
 
-    let conn = Connection::open("friends.db")?;
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS friend (
-            id integer primary key,
-            name text not null unique,
-            freq_days integer,
-            last_seen text
-        )",
-        [],
-    )?;
+    let conn = db::connect();
+    embedded_migrations::run(&conn).expect("Failed to run migration");
 
-    execute_subcommand(opt, conn)?;
-    Ok(())
+    execute_command(opt, conn);
 }
 
-#[derive(StructOpt)]
+#[derive(StructOpt, Debug)]
 #[structopt(
     name = "FriendGrow",
     about = "Let your friendships grow",
@@ -36,48 +43,9 @@ enum FriendGrow {
     AddFriend { friend: String },
 }
 
-#[derive(Debug)]
-struct Friend {
-    id: i32,
-    name: String,
-    freq_days: i32,
-    last_seen: Option<String>,
-}
-
-fn execute_subcommand(opt: FriendGrow, conn: Connection) -> Result<()> {
+fn execute_command(opt: FriendGrow, conn: SqliteConnection) {
     match opt {
-        FriendGrow::ListFriends {} => {
-            return list_friends(conn);
-        }
-        FriendGrow::AddFriend { friend } => {
-            return add_friend(friend, conn);
-        }
-    }
-}
-
-fn list_friends(conn: Connection) -> Result<()> {
-    let mut stmt = conn.prepare("SELECT id, name, freq_days, last_seen FROM friends")?;
-    let rows = stmt.query_map([], |row| {
-        Ok(Friend {
-            id: row.get(0)?,
-            name: row.get(1)?,
-            freq_days: row.get(2)?,
-            last_seen: row.get(3)?,
-        })
-    })?;
-
-    for friend_result in rows {
-        println!("{:?}", friend_result);
-    }
-
-    Ok(())
-}
-
-fn add_friend(friend: String, conn: Connection) -> Result<()> {
-    conn.execute(
-        "INSERT INTO friends (name, freq_days) values (?1, ?2)",
-        params![friend, DEFAULT_FREQ_DAYS],
-    )?;
-
-    Ok(())
+        FriendGrow::ListFriends {} => list_friends(conn),
+        FriendGrow::AddFriend { friend } => add_friend(friend, conn),
+    };
 }
