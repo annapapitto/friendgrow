@@ -1,16 +1,11 @@
+use crate::db::*;
 use crate::models::*;
-use crate::schema::friends;
-use diesel::prelude::*;
+use diesel::SqliteConnection;
 
 const DEFAULT_FREQ_DAYS: i32 = 100;
 
 pub fn list_friends(conn: SqliteConnection) {
-    use self::friends::dsl::*;
-
-    // TODO move this to db.rs?
-    let results = friends
-        .load::<Friend>(&conn)
-        .expect("Error loading friends");
+    let results = load_all_friends(conn).expect("Error getting friends");
 
     for friend in results {
         let seen_str: String = friend.last_seen.map_or("Never seen".to_string(), |last| {
@@ -29,9 +24,5 @@ pub fn add_friend(name: String, conn: SqliteConnection) {
         freq_days: DEFAULT_FREQ_DAYS,
     };
 
-    // TODO move this to db.rs?
-    diesel::insert_into(friends::table)
-        .values(&new_friend)
-        .execute(&conn)
-        .expect(&format!("Error adding friend {}", name));
+    insert_friend(new_friend, conn).expect(&format!("Error adding friend {}", name));
 }
