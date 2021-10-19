@@ -26,4 +26,17 @@ pub fn insert_friend(new_friend: NewFriend, conn: SqliteConnection) -> Result<us
         .execute(&conn)
 }
 
-pub fn update_last_seen(name: String, last_seen: String, conn: SqliteConnection) {}
+pub fn update_last_seen(
+    friend_name: String,
+    new_last_seen: String,
+    conn: SqliteConnection,
+) -> Result<usize, Error> {
+    use self::friends::dsl::*;
+    let seen_friend = friends
+        .filter(name.eq(friend_name.clone()))
+        .first::<Friend>(&conn)
+        .expect(&format!("No friend named {}", friend_name));
+    diesel::update(&seen_friend)
+        .set(last_seen.eq(new_last_seen))
+        .execute(&conn)
+}

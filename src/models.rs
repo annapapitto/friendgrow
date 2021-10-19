@@ -1,6 +1,6 @@
 use crate::schema::friends;
 
-#[derive(Queryable)]
+#[derive(Identifiable, Queryable)]
 pub struct Friend {
     pub id: i32,
     pub name: String,

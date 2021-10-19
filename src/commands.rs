@@ -34,5 +34,7 @@ pub fn record_seen(name: String, date: String, conn: SqliteConnection) {
         date, DATE_FORMAT
     ));
 
-    update_last_seen(name, date.to_string(), conn);
+    // TODO check that the new date is later than the existing date
+
+    update_last_seen(name, date.to_string(), conn).expect(&format!("Error recording seen"));
 }
