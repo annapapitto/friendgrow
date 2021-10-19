@@ -25,3 +25,5 @@ pub fn insert_friend(new_friend: NewFriend, conn: SqliteConnection) -> Result<us
         .values(&new_friend)
         .execute(&conn)
 }
+
+pub fn update_last_seen(name: String, last_seen: String, conn: SqliteConnection) {}
