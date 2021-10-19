@@ -1,5 +1,6 @@
 use crate::models::*;
 use crate::schema::friends;
+pub use diesel::prelude::SqliteConnection;
 use diesel::prelude::*;
 use diesel::result::Error;
 use dotenv::dotenv;

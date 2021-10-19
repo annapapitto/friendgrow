@@ -1,6 +1,5 @@
 use crate::db::*;
 use crate::models::*;
-use diesel::SqliteConnection;
 
 const DEFAULT_FREQ_DAYS: i32 = 100;
 
