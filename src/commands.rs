@@ -7,15 +7,8 @@ const DATE_FORMAT: &str = "%Y-%m-%d";
 
 pub fn list_friends(conn: &SqliteConnection) {
     let results = load_all_friends(conn).expect("Error getting friends");
-
     for friend in results {
-        let seen_str: String = friend.last_seen.map_or("Never seen".to_string(), |last| {
-            format!("Last seen on {}", last)
-        });
-        println!(
-            "{}\tEvery {} days\t{}",
-            friend.name, friend.freq_days, seen_str
-        );
+        println!("{}", friend);
     }
 }
 

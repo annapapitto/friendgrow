@@ -1,4 +1,5 @@
 use crate::schema::friends;
+use std::fmt;
 
 #[derive(Identifiable, Queryable)]
 pub struct Friend {
@@ -6,6 +7,22 @@ pub struct Friend {
     pub name: String,
     pub freq_days: i32,
     pub last_seen: Option<String>,
+}
+
+impl fmt::Display for Friend {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let seen_str: String = self
+            .last_seen
+            .clone()
+            .map_or("Never seen".to_string(), |last| {
+                format!("Last seen on {}", last)
+            });
+        write!(
+            f,
+            "{}\tEvery {} days\t{}",
+            self.name, self.freq_days, seen_str
+        )
+    }
 }
 
 #[derive(Insertable)]
