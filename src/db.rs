@@ -27,6 +27,16 @@ pub fn load_friend(friend_name: &String, conn: &SqliteConnection) -> Friend {
         .expect(&format!("No friend named {}", friend_name))
 }
 
+pub fn get_last_seen(
+    friend_name: &String,
+    conn: &SqliteConnection,
+) -> Result<Option<String>, Error> {
+    friends
+        .filter(name.eq(friend_name.clone()))
+        .select(last_seen)
+        .first::<Option<String>>(conn)
+}
+
 pub fn insert_friend(new_friend: NewFriend, conn: &SqliteConnection) -> Result<usize, Error> {
     diesel::insert_into(friends::table)
         .values(&new_friend)

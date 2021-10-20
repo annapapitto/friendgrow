@@ -1,6 +1,6 @@
 use crate::db::*;
 use crate::models::*;
-use chrono::NaiveDate;
+use chrono::{Local, NaiveDate};
 
 const DEFAULT_FREQ_DAYS: i32 = 100;
 const DATE_FORMAT: &str = "%Y-%m-%d";
@@ -21,14 +21,27 @@ pub fn add_friend(name: String, conn: &SqliteConnection) {
 }
 
 pub fn record_seen(name: String, date: String, conn: &SqliteConnection) {
-    let date = NaiveDate::parse_from_str(&date, DATE_FORMAT).expect(&format!(
+    let new_date = parse_date(date);
+
+    let last_date = get_last_seen(&name, conn).expect(&format!("Error getting previously seen"));
+    if last_date.is_some() {
+        let last_date = parse_date(last_date.unwrap());
+        if last_date > new_date {
+            panic!("Already seen more recently on {}", last_date);
+        }
+    }
+
+    let local_date = Local::now().date().naive_local();
+    if new_date > local_date {
+        panic!("Cannot be seen in the future");
+    }
+
+    update_last_seen(name, new_date.to_string(), conn).expect(&format!("Error recording seen"));
+}
+
+fn parse_date(date: String) -> NaiveDate {
+    NaiveDate::parse_from_str(&date, DATE_FORMAT).expect(&format!(
         "Date {} does not have format {}",
         date, DATE_FORMAT
-    ));
-
-    // TODO check that the new date is later than the existing date
-
-    // TODO check that the new date is no earlier than today
-
-    update_last_seen(name, date.to_string(), conn).expect(&format!("Error recording seen"));
+    ))
 }
