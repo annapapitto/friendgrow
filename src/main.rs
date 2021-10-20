@@ -22,7 +22,7 @@ fn main() {
     let conn = db::connect();
     embedded_migrations::run(&conn).expect("Failed to run migration");
 
-    execute_command(opt, conn);
+    execute_command(opt, &conn);
 }
 
 #[derive(StructOpt, Debug)]
@@ -43,7 +43,7 @@ enum FriendGrow {
     RecordSeen { name: String, date: String },
 }
 
-fn execute_command(opt: FriendGrow, conn: SqliteConnection) {
+fn execute_command(opt: FriendGrow, conn: &SqliteConnection) {
     match opt {
         FriendGrow::ListFriends {} => list_friends(conn),
         FriendGrow::AddFriend { name } => add_friend(name, conn),
