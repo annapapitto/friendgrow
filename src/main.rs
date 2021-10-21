@@ -19,7 +19,7 @@ embed_migrations!();
 fn main() {
     let opt = FriendGrow::from_args();
 
-    let conn = db::connect();
+    let conn = db::connect().expect("Failed to connect to database");
     embedded_migrations::run(&conn).expect("Failed to run migration");
 
     execute_command(opt, &conn);
