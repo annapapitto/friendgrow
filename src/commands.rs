@@ -13,7 +13,7 @@ pub fn list_friends(conn: &SqliteConnection) {
 }
 
 pub fn show_friend(name: String, conn: &SqliteConnection) {
-    let friend = db::load_friend(&name, conn).expect(&format!("Error getting friend {}", name));
+    let friend = db::load_friend(&name, conn).expect("Error getting friend");
     println!("{}", friend);
 }
 
@@ -23,15 +23,14 @@ pub fn add_friend(name: String, conn: &SqliteConnection) {
         freq_days: DEFAULT_FREQ_DAYS,
     };
 
-    db::insert_friend(new_friend, conn).expect(&format!("Error adding friend {}", name));
+    db::insert_friend(new_friend, conn).expect("Error adding friend");
     show_friend(name, conn);
 }
 
 pub fn record_seen(name: String, date: String, conn: &SqliteConnection) {
     let new_date = parse_date(date);
 
-    let last_date =
-        db::get_last_seen(&name, conn).expect(&format!("Error getting previously seen"));
+    let last_date = db::get_last_seen(&name, conn).expect("Error getting previously seen");
     if last_date.is_some() {
         let last_date = parse_date(last_date.unwrap());
         if last_date > new_date {
@@ -44,8 +43,7 @@ pub fn record_seen(name: String, date: String, conn: &SqliteConnection) {
         panic!("Cannot be seen in the future");
     }
 
-    db::update_last_seen(&name, new_date.to_string(), conn)
-        .expect(&format!("Error recording seen"));
+    db::update_last_seen(&name, new_date.to_string(), conn).expect("Error recording seen");
     show_friend(name, conn);
 }
 
