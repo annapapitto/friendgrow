@@ -41,6 +41,10 @@ pub fn insert_friend(new_friend: NewFriend, conn: &SqliteConnection) -> Result<u
         .execute(conn)
 }
 
+pub fn delete_friend(friend_name: &String, conn: &SqliteConnection) -> Result<usize, Error> {
+    diesel::delete(friends.filter(name.eq(friend_name.clone()))).execute(conn)
+}
+
 pub fn update_last_seen(
     friend_name: &String,
     new_last_seen: String,

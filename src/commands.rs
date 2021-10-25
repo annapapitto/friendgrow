@@ -27,6 +27,11 @@ pub fn add_friend(name: String, conn: &SqliteConnection) {
     show_friend(name, conn);
 }
 
+pub fn remove_friend(name: String, conn: &SqliteConnection) {
+    show_friend(name.clone(), conn);
+    db::delete_friend(&name, conn).expect("Error removing friend");
+}
+
 pub fn record_seen(name: String, date: String, conn: &SqliteConnection) {
     let new_date = parse_date(date);
 
