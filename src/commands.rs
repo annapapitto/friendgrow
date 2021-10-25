@@ -17,10 +17,10 @@ pub fn show_friend(name: String, conn: &SqliteConnection) {
     println!("{}", friend);
 }
 
-pub fn add_friend(name: String, conn: &SqliteConnection) {
+pub fn add_friend(name: String, freq_days: Option<i32>, conn: &SqliteConnection) {
     let new_friend = NewFriend {
         name: name.clone(),
-        freq_days: DEFAULT_FREQ_DAYS,
+        freq_days: freq_days.unwrap_or(DEFAULT_FREQ_DAYS),
     };
 
     db::insert_friend(new_friend, conn).expect("Error adding friend");
