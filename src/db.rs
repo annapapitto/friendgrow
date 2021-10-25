@@ -42,7 +42,7 @@ pub fn insert_friend(new_friend: NewFriend, conn: &SqliteConnection) -> Result<u
 }
 
 pub fn update_last_seen(
-    friend_name: String,
+    friend_name: &String,
     new_last_seen: String,
     conn: &SqliteConnection,
 ) -> Result<usize, Error> {

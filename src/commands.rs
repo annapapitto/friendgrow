@@ -12,12 +12,19 @@ pub fn list_friends(conn: &SqliteConnection) {
     }
 }
 
+pub fn show_friend(name: String, conn: &SqliteConnection) {
+    let friend = load_friend(&name, conn).expect(&format!("Error getting friend {}", name));
+    println!("{}", friend);
+}
+
 pub fn add_friend(name: String, conn: &SqliteConnection) {
     let new_friend = NewFriend {
         name: name.clone(),
         freq_days: DEFAULT_FREQ_DAYS,
     };
+
     insert_friend(new_friend, conn).expect(&format!("Error adding friend {}", name));
+    show_friend(name, conn);
 }
 
 pub fn record_seen(name: String, date: String, conn: &SqliteConnection) {
@@ -36,7 +43,8 @@ pub fn record_seen(name: String, date: String, conn: &SqliteConnection) {
         panic!("Cannot be seen in the future");
     }
 
-    update_last_seen(name, new_date.to_string(), conn).expect(&format!("Error recording seen"));
+    update_last_seen(&name, new_date.to_string(), conn).expect(&format!("Error recording seen"));
+    show_friend(name, conn);
 }
 
 fn parse_date(date: String) -> NaiveDate {

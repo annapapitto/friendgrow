@@ -36,6 +36,9 @@ enum FriendGrow {
     #[structopt(name = "list", about = "List all of your friends")]
     ListFriends {},
 
+    #[structopt(name = "show", about = "Show a friend")]
+    ShowFriend { name: String },
+
     #[structopt(name = "add", about = "Add a friend")]
     AddFriend { name: String },
 
@@ -46,6 +49,7 @@ enum FriendGrow {
 fn execute_command(opt: FriendGrow, conn: &SqliteConnection) {
     match opt {
         FriendGrow::ListFriends {} => list_friends(conn),
+        FriendGrow::ShowFriend { name } => show_friend(name, conn),
         FriendGrow::AddFriend { name } => add_friend(name, conn),
         FriendGrow::RecordSeen { name, date } => record_seen(name, date, conn),
     };
