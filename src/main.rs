@@ -2,7 +2,6 @@
 extern crate diesel;
 #[macro_use]
 extern crate diesel_migrations;
-extern crate dotenv; // TODO why was this introduced? do i need it in db.rs?
 
 mod commands;
 mod db;
