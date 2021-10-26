@@ -3,6 +3,7 @@ use crate::models::*;
 use chrono::{Local, NaiveDate};
 
 const DEFAULT_FREQ_DAYS: i32 = 100;
+const MAX_FREQ_DAYS: i32 = 365;
 const DATE_FORMAT: &str = "%Y-%m-%d";
 
 pub fn list_friends(conn: &SqliteConnection) {
@@ -30,6 +31,18 @@ pub fn add_friend(name: String, freq_days: Option<i32>, conn: &SqliteConnection)
 pub fn remove_friend(name: String, conn: &SqliteConnection) {
     show_friend(name.clone(), conn);
     db::delete_friend(&name, conn).expect("Error removing friend");
+}
+
+pub fn set_frequency(name: String, freq_days: i32, conn: &SqliteConnection) {
+    if freq_days <= 0 || freq_days > MAX_FREQ_DAYS {
+        panic!(
+            "Must see friends between every 1 day and every {} days",
+            MAX_FREQ_DAYS
+        );
+    }
+
+    db::update_freq_days(&name, freq_days, conn).expect("Error setting frequency");
+    show_friend(name, conn);
 }
 
 pub fn record_seen(name: String, date: String, conn: &SqliteConnection) {

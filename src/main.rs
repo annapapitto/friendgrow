@@ -42,12 +42,19 @@ enum FriendGrow {
     AddFriend {
         name: String,
 
-        #[structopt(short, help = "How often to see, in days")]
+        #[structopt(short, help = "How often to see them, in days")]
         freq_days: Option<i32>,
     },
 
     #[structopt(name = "remove", about = "Remove a friend")]
     RemoveFriend { name: String },
+
+    #[structopt(name = "set-freq", about = "Set how often to see a friend")]
+    SetFrequency {
+        name: String,
+        #[structopt(help = "How often to see them, in days")]
+        freq_days: i32,
+    },
 
     #[structopt(name = "record", about = "Record seeing a friend")]
     RecordSeen {
@@ -64,6 +71,7 @@ fn execute_command(opt: FriendGrow, conn: &SqliteConnection) {
         FriendGrow::ShowFriend { name } => show_friend(name, conn),
         FriendGrow::AddFriend { name, freq_days } => add_friend(name, freq_days, conn),
         FriendGrow::RemoveFriend { name } => remove_friend(name, conn),
+        FriendGrow::SetFrequency { name, freq_days } => set_frequency(name, freq_days, conn),
         FriendGrow::RecordSeen { name, date } => record_seen(name, date, conn),
     };
 }
