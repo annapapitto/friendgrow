@@ -45,14 +45,14 @@ pub fn delete_friend(friend_name: &String, conn: &SqliteConnection) -> Result<us
     diesel::delete(friends.filter(name.eq(friend_name.clone()))).execute(conn)
 }
 
-pub fn update_freq_days(
+pub fn update_freq_weeks(
     friend_name: &String,
-    new_freq_days: i32,
+    new_freq_weeks: i32,
     conn: &SqliteConnection,
 ) -> Result<usize, Error> {
     let friend = load_friend(&friend_name, conn)?;
     diesel::update(&friend)
-        .set(freq_days.eq(new_freq_days))
+        .set(freq_weeks.eq(new_freq_weeks))
         .execute(conn)
 }
 

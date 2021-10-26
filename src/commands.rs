@@ -2,8 +2,8 @@ use crate::db::{self, SqliteConnection};
 use crate::models::*;
 use chrono::{Local, NaiveDate};
 
-const DEFAULT_FREQ_DAYS: i32 = 100;
-const MAX_FREQ_DAYS: i32 = 365;
+const DEFAULT_FREQ_WEEKS: i32 = 10;
+const MAX_FREQ_WEEKS: i32 = 52;
 const DATE_FORMAT: &str = "%Y-%m-%d";
 
 pub fn list_friends(conn: &SqliteConnection) {
@@ -18,10 +18,10 @@ pub fn show_friend(name: String, conn: &SqliteConnection) {
     println!("{}", friend);
 }
 
-pub fn add_friend(name: String, freq_days: Option<i32>, conn: &SqliteConnection) {
+pub fn add_friend(name: String, freq_weeks: Option<i32>, conn: &SqliteConnection) {
     let new_friend = NewFriend {
         name: name.clone(),
-        freq_days: freq_days.unwrap_or(DEFAULT_FREQ_DAYS),
+        freq_weeks: freq_weeks.unwrap_or(DEFAULT_FREQ_WEEKS),
     };
 
     db::insert_friend(new_friend, conn).expect("Error adding friend");
@@ -33,15 +33,15 @@ pub fn remove_friend(name: String, conn: &SqliteConnection) {
     db::delete_friend(&name, conn).expect("Error removing friend");
 }
 
-pub fn set_frequency(name: String, freq_days: i32, conn: &SqliteConnection) {
-    if freq_days <= 0 || freq_days > MAX_FREQ_DAYS {
+pub fn set_frequency(name: String, freq_weeks: i32, conn: &SqliteConnection) {
+    if freq_weeks <= 0 || freq_weeks > MAX_FREQ_WEEKS {
         panic!(
-            "Must see friends between every 1 day and every {} days",
-            MAX_FREQ_DAYS
+            "Must see friends between every 1 week and every {} weeks",
+            MAX_FREQ_WEEKS
         );
     }
 
-    db::update_freq_days(&name, freq_days, conn).expect("Error setting frequency");
+    db::update_freq_weeks(&name, freq_weeks, conn).expect("Error setting frequency");
     show_friend(name, conn);
 }
 

@@ -5,7 +5,7 @@ use std::fmt;
 pub struct Friend {
     pub id: i32,
     pub name: String,
-    pub freq_days: i32,
+    pub freq_weeks: i32,
     pub last_seen: Option<String>,
 }
 
@@ -19,8 +19,8 @@ impl fmt::Display for Friend {
             });
         write!(
             f,
-            "{}\tEvery {} days\t{}",
-            self.name, self.freq_days, seen_str
+            "{}\tEvery {} weeks\t{}",
+            self.name, self.freq_weeks, seen_str
         )
     }
 }
@@ -29,5 +29,5 @@ impl fmt::Display for Friend {
 #[table_name = "friends"]
 pub struct NewFriend {
     pub name: String,
-    pub freq_days: i32,
+    pub freq_weeks: i32,
 }
