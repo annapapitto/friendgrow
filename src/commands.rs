@@ -18,9 +18,15 @@ pub fn show_friend(name: String, conn: &SqliteConnection) {
     println!("{}", friend);
 }
 
-pub fn add_friend(name: String, freq_weeks: Option<i32>, conn: &SqliteConnection) {
+pub fn add_friend(
+    name: String,
+    location: String,
+    freq_weeks: Option<i32>,
+    conn: &SqliteConnection,
+) {
     let new_friend = NewFriend {
         name: name.clone(),
+        location: location.clone(),
         freq_weeks: freq_weeks.unwrap_or(DEFAULT_FREQ_WEEKS),
     };
 

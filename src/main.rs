@@ -42,6 +42,9 @@ enum FriendGrow {
     AddFriend {
         name: String,
 
+        #[structopt(help = "Where they live")]
+        location: String,
+
         #[structopt(short, help = "How often to see them, in weeks")]
         freq_weeks: Option<i32>,
     },
@@ -69,7 +72,11 @@ fn execute_command(opt: FriendGrow, conn: &SqliteConnection) {
     match opt {
         FriendGrow::ListFriends {} => list_friends(conn),
         FriendGrow::ShowFriend { name } => show_friend(name, conn),
-        FriendGrow::AddFriend { name, freq_weeks } => add_friend(name, freq_weeks, conn),
+        FriendGrow::AddFriend {
+            name,
+            location,
+            freq_weeks,
+        } => add_friend(name, location, freq_weeks, conn),
         FriendGrow::RemoveFriend { name } => remove_friend(name, conn),
         FriendGrow::SetFrequency { name, freq_weeks } => set_frequency(name, freq_weeks, conn),
         FriendGrow::RecordSeen { name, date } => record_seen(name, date, conn),
