@@ -4,6 +4,7 @@ extern crate diesel;
 extern crate diesel_migrations;
 
 mod commands;
+mod dates;
 mod db;
 mod models;
 mod schema;
@@ -73,6 +74,9 @@ enum FriendGrow {
         #[structopt(help = "Date seen in YYYY-MM-DD")]
         date: String,
     },
+
+    #[structopt(name = "upcoming", about = "List friends who are upcoming for a visit")]
+    ListUpcoming {},
 }
 
 fn execute_command(opt: FriendGrow, conn: &SqliteConnection) {
@@ -88,5 +92,6 @@ fn execute_command(opt: FriendGrow, conn: &SqliteConnection) {
         FriendGrow::SetLocation { name, location } => set_location(name, location, conn),
         FriendGrow::SetFrequency { name, freq_weeks } => set_frequency(name, freq_weeks, conn),
         FriendGrow::RecordSeen { name, date } => record_seen(name, date, conn),
+        FriendGrow::ListUpcoming {} => list_upcoming(conn),
     };
 }

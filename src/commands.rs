@@ -1,14 +1,12 @@
+use crate::dates;
 use crate::db::{self, SqliteConnection};
 use crate::models::*;
-use chrono::{Local, NaiveDate};
 
 const DEFAULT_FREQ_WEEKS: i32 = 10;
-const MAX_FREQ_WEEKS: i32 = 52;
-const DATE_FORMAT: &str = "%Y-%m-%d";
 
 pub fn list_friends(conn: &SqliteConnection) {
-    let results = db::load_all_friends(conn).expect("Error getting friends");
-    for friend in results {
+    let all_friends = db::load_all_friends(conn).expect("Error getting friends");
+    for friend in all_friends {
         println!("{}", friend);
     }
 }
@@ -45,129 +43,39 @@ pub fn set_location(name: String, location: String, conn: &SqliteConnection) {
 }
 
 pub fn set_frequency(name: String, freq_weeks: i32, conn: &SqliteConnection) {
-    check_frequency(freq_weeks);
+    dates::check_frequency(freq_weeks);
 
     db::update_freq_weeks(&name, freq_weeks, conn).expect("Error setting frequency");
     show_friend(name, conn);
 }
 
 pub fn record_seen(name: String, date: String, conn: &SqliteConnection) {
-    let new_date = parse_date(&date);
+    let new_date = dates::parse_date(&date);
 
     let last_date = db::get_last_seen(&name, conn).expect("Error getting previously seen");
-    check_new_seen(new_date, last_date);
+    dates::check_new_seen(new_date, last_date);
 
     db::update_last_seen(&name, new_date.to_string(), conn).expect("Error recording seen");
     show_friend(name, conn);
 }
 
-fn parse_date(date: &str) -> NaiveDate {
-    NaiveDate::parse_from_str(date, DATE_FORMAT).expect(&format!(
-        "Date {} does not have format {}",
-        date, DATE_FORMAT
-    ))
-}
+pub fn list_upcoming(conn: &SqliteConnection) {
+    let results = db::load_all_friends(conn).expect("Error getting friends");
+    let today = dates::local_today();
+    let mut upcoming_friends = dates::UpcomingFriends::new();
 
-fn check_frequency(freq_weeks: i32) {
-    if freq_weeks <= 0 || freq_weeks > MAX_FREQ_WEEKS {
-        panic!(
-            "Must see friends between every 1 week and every {} weeks",
-            MAX_FREQ_WEEKS
-        );
-    }
-}
-
-fn check_new_seen(new_date: NaiveDate, last_date: Option<String>) {
-    if last_date.is_some() {
-        let last_date = parse_date(&last_date.unwrap());
-        if last_date > new_date {
-            panic!("Already seen more recently on {}", last_date);
+    for friend in results {
+        match friend.last_seen.clone() {
+            Some(last_seen) => {
+                let days_until_due =
+                    dates::get_days_until_due(&last_seen, friend.freq_weeks, today);
+                upcoming_friends.push_seen(friend.clone(), days_until_due);
+            }
+            None => {
+                upcoming_friends.push_never_seen(friend.clone());
+            }
         }
     }
 
-    if new_date > local_today() {
-        panic!("Cannot record in the future");
-    }
-}
-
-fn local_today() -> NaiveDate {
-    Local::now().date().naive_local()
-}
-
-#[cfg(test)]
-mod private_tests {
-    use super::*;
-    use chrono::Duration;
-
-    #[test]
-    fn test_parse_date() {
-        let correct = NaiveDate::from_ymd(2021, 10, 26);
-        let res = parse_date("2021-10-26");
-        assert_eq!(res, correct);
-
-        let correct = NaiveDate::from_ymd(100, 2, 3);
-        let res = parse_date("100-2-3");
-        assert_eq!(res, correct);
-        let res = parse_date("0100-02-03");
-        assert_eq!(res, correct);
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_parse_date_empty() {
-        parse_date("");
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_parse_date_month_day_flipped() {
-        parse_date("2021-20-10");
-    }
-
-    #[test]
-    fn test_check_frequency() {
-        check_frequency(1);
-        check_frequency(20);
-        check_frequency(52);
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_check_frequency_zero() {
-        check_frequency(0);
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_check_frequency_negative() {
-        check_frequency(-1);
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_check_frequency_big() {
-        check_frequency(53);
-    }
-
-    #[test]
-    fn test_check_new_seen() {
-        let new_date = NaiveDate::from_ymd(102, 2, 5);
-        check_new_seen(new_date, Some("100-2-4".to_string()));
-        check_new_seen(new_date, Some("101-12-3".to_string()));
-        check_new_seen(new_date, None);
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_check_new_seen_earlier() {
-        let new_date = NaiveDate::from_ymd(200, 4, 7);
-        check_new_seen(new_date, Some("200-4-8".to_string()));
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_check_new_seen_future() {
-        let tomorrow = local_today() + Duration::days(1);
-        check_new_seen(tomorrow, None);
-    }
+    upcoming_friends.print();
 }

@@ -1,7 +1,7 @@
 use crate::schema::friends;
 use std::fmt;
 
-#[derive(Identifiable, Queryable)]
+#[derive(Identifiable, Queryable, Clone, Hash, PartialEq, Eq)]
 pub struct Friend {
     pub id: i32,
     pub name: String,
