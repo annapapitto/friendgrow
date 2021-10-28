@@ -39,6 +39,11 @@ pub fn remove_friend(name: String, conn: &SqliteConnection) {
     db::delete_friend(&name, conn).expect("Error removing friend");
 }
 
+pub fn set_location(name: String, location: String, conn: &SqliteConnection) {
+    db::update_location(&name, location, conn).expect("Error setting location");
+    show_friend(name, conn);
+}
+
 pub fn set_frequency(name: String, freq_weeks: i32, conn: &SqliteConnection) {
     check_frequency(freq_weeks);
 

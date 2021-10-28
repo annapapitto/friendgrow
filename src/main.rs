@@ -52,6 +52,13 @@ enum FriendGrow {
     #[structopt(name = "remove", about = "Remove a friend")]
     RemoveFriend { name: String },
 
+    #[structopt(name = "set-loc", about = "Set where a friend is located")]
+    SetLocation {
+        name: String,
+        #[structopt(help = "Where they are located")]
+        location: String,
+    },
+
     #[structopt(name = "set-freq", about = "Set how often to see a friend")]
     SetFrequency {
         name: String,
@@ -78,6 +85,7 @@ fn execute_command(opt: FriendGrow, conn: &SqliteConnection) {
             freq_weeks,
         } => add_friend(name, location, freq_weeks, conn),
         FriendGrow::RemoveFriend { name } => remove_friend(name, conn),
+        FriendGrow::SetLocation { name, location } => set_location(name, location, conn),
         FriendGrow::SetFrequency { name, freq_weeks } => set_frequency(name, freq_weeks, conn),
         FriendGrow::RecordSeen { name, date } => record_seen(name, date, conn),
     };

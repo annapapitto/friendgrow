@@ -56,6 +56,17 @@ pub fn update_freq_weeks(
         .execute(conn)
 }
 
+pub fn update_location(
+    friend_name: &String,
+    new_location: String,
+    conn: &SqliteConnection,
+) -> Result<usize, Error> {
+    let friend = load_friend(&friend_name, conn)?;
+    diesel::update(&friend)
+        .set(location.eq(new_location))
+        .execute(conn)
+}
+
 pub fn update_last_seen(
     friend_name: &String,
     new_last_seen: String,
