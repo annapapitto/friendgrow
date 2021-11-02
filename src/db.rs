@@ -2,7 +2,6 @@ use crate::models::*;
 use crate::schema::friends::{self, dsl::*};
 pub use diesel::prelude::SqliteConnection;
 use diesel::prelude::*;
-use diesel::result::Error;
 use dotenv::dotenv;
 use std::env;
 
@@ -15,7 +14,7 @@ pub fn connect() -> ConnectionResult<SqliteConnection> {
     SqliteConnection::establish(&database_url)
 }
 
-pub fn load_all_friends(conn: &SqliteConnection) -> Result<Vec<Friend>, Error> {
+pub fn load_all_friends(conn: &SqliteConnection) -> QueryResult<Vec<Friend>> {
     friends::table.load::<Friend>(conn)
 }
 
@@ -25,23 +24,13 @@ pub fn load_friend(friend_name: &String, conn: &SqliteConnection) -> QueryResult
         .first::<Friend>(conn)
 }
 
-pub fn get_last_seen(
-    friend_name: &String,
-    conn: &SqliteConnection,
-) -> Result<Option<String>, Error> {
-    friends
-        .filter(name.eq(friend_name.clone()))
-        .select(last_seen)
-        .first::<Option<String>>(conn)
-}
-
-pub fn insert_friend(new_friend: NewFriend, conn: &SqliteConnection) -> Result<usize, Error> {
+pub fn insert_friend(new_friend: NewFriend, conn: &SqliteConnection) -> QueryResult<usize> {
     diesel::insert_into(friends::table)
         .values(&new_friend)
         .execute(conn)
 }
 
-pub fn delete_friend(friend_name: &String, conn: &SqliteConnection) -> Result<usize, Error> {
+pub fn delete_friend(friend_name: &String, conn: &SqliteConnection) -> QueryResult<usize> {
     diesel::delete(friends.filter(name.eq(friend_name.clone()))).execute(conn)
 }
 
@@ -49,7 +38,7 @@ pub fn update_freq_weeks(
     friend_name: &String,
     new_freq_weeks: i32,
     conn: &SqliteConnection,
-) -> Result<usize, Error> {
+) -> QueryResult<usize> {
     let friend = load_friend(&friend_name, conn)?;
     diesel::update(&friend)
         .set(freq_weeks.eq(new_freq_weeks))
@@ -60,7 +49,7 @@ pub fn update_location(
     friend_name: &String,
     new_location: String,
     conn: &SqliteConnection,
-) -> Result<usize, Error> {
+) -> QueryResult<usize> {
     let friend = load_friend(&friend_name, conn)?;
     diesel::update(&friend)
         .set(location.eq(new_location))
@@ -71,7 +60,7 @@ pub fn update_last_seen(
     friend_name: &String,
     new_last_seen: String,
     conn: &SqliteConnection,
-) -> Result<usize, Error> {
+) -> QueryResult<usize> {
     let seen_friend = load_friend(&friend_name, conn)?;
     diesel::update(&seen_friend)
         .set(last_seen.eq(new_last_seen))

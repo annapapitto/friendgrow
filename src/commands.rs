@@ -53,8 +53,8 @@ pub fn set_frequency(name: String, freq_weeks: i32, conn: &SqliteConnection) {
 pub fn record_seen(name: String, date: String, conn: &SqliteConnection) {
     let new_date = dates::parse_date(&date);
 
-    let last_date = db::get_last_seen(&name, conn).expect("Error getting previously seen");
-    dates::check_new_seen(new_date, last_date);
+    let friend = db::load_friend(&name, conn).expect("Error getting friend");
+    dates::check_new_seen(new_date, friend.last_seen);
 
     db::update_last_seen(&name, new_date.to_string(), conn).expect("Error recording seen");
     show_friend(name, conn);
