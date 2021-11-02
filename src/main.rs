@@ -8,6 +8,7 @@ mod dates;
 mod db;
 mod models;
 mod schema;
+mod upcoming;
 
 use crate::commands::*;
 use db::SqliteConnection;

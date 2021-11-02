@@ -1,6 +1,7 @@
 use crate::dates;
 use crate::db::{self, SqliteConnection};
 use crate::models::*;
+use crate::upcoming::UpcomingFriends;
 
 const DEFAULT_FREQ_WEEKS: i32 = 10;
 
@@ -62,19 +63,10 @@ pub fn record_seen(name: String, date: String, conn: &SqliteConnection) {
 pub fn list_upcoming(conn: &SqliteConnection) {
     let results = db::load_all_friends(conn).expect("Error getting friends");
     let today = dates::local_today();
-    let mut upcoming_friends = dates::UpcomingFriends::new();
+    let mut upcoming_friends = UpcomingFriends::new();
 
     for friend in results {
-        match friend.last_seen.clone() {
-            Some(last_seen) => {
-                let days_until_due =
-                    dates::get_days_until_due(&last_seen, friend.freq_weeks, today);
-                upcoming_friends.push_seen(friend.clone(), days_until_due);
-            }
-            None => {
-                upcoming_friends.push_never_seen(friend.clone());
-            }
-        }
+        upcoming_friends.push(friend.clone(), today);
     }
 
     upcoming_friends.print();
