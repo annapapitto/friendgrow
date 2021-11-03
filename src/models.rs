@@ -1,5 +1,6 @@
 use crate::dates;
 use crate::schema::friends;
+use anyhow::Result;
 use chrono::{Duration, NaiveDate};
 use prettytable::{Cell, Row};
 use std::fmt;
@@ -14,15 +15,14 @@ pub struct Friend {
 }
 
 impl Friend {
-    pub fn days_until_due(&self, today: NaiveDate) -> Option<i64> {
-        self.last_seen.as_ref().map(|last_seen| {
-            let last_seen = dates::parse_date(&last_seen);
-            let weeks_to_next = Duration::weeks(self.freq_weeks as i64);
-            let next_due = last_seen
-                .checked_add_signed(weeks_to_next)
-                .expect("Error calculating when to next see");
-            (next_due - today).num_days()
-        })
+    pub fn days_until_due(&self, today: NaiveDate) -> Result<Option<i64>> {
+        if self.last_seen.is_none() {
+            return Ok(None);
+        }
+        let last_seen = dates::parse_date(&self.last_seen.clone().unwrap())?;
+        let weeks_to_next = Duration::weeks(self.freq_weeks as i64);
+        let next_due = last_seen + weeks_to_next;
+        Ok(Some((next_due - today).num_days()))
     }
 
     pub fn get_table_row(&self) -> Row {
@@ -89,7 +89,7 @@ mod tests {
             last_seen: None,
         };
 
-        assert_eq!(friend.days_until_due(today), None);
+        assert_eq!(friend.days_until_due(today).unwrap(), None);
     }
 
     #[test]
@@ -103,7 +103,7 @@ mod tests {
             last_seen: Some("2021-04-01".to_string()),
         };
 
-        assert_eq!(friend.days_until_due(today), Some(13));
+        assert_eq!(friend.days_until_due(today).unwrap(), Some(13));
     }
 
     #[test]
@@ -117,6 +117,6 @@ mod tests {
             last_seen: Some("2021-04-01".to_string()),
         };
 
-        assert_eq!(friend.days_until_due(today), Some(-5));
+        assert_eq!(friend.days_until_due(today).unwrap(), Some(-5));
     }
 }

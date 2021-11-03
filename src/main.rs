@@ -13,19 +13,21 @@ mod schema;
 mod upcoming;
 
 use crate::commands::*;
+use anyhow::{Context, Result};
 use db::SqliteConnection;
 use diesel_migrations::embed_migrations;
 use structopt::StructOpt;
 
 embed_migrations!();
 
-fn main() {
+fn main() -> Result<()> {
     let opt = FriendGrow::from_args();
 
-    let conn = db::connect().expect("Failed to connect to database");
-    embedded_migrations::run(&conn).expect("Failed to run migration");
+    let conn = db::connect().context("Failed to connect to database")?;
+    embedded_migrations::run(&conn).context("Failed to run migration")?;
 
-    execute_command(opt, &conn);
+    execute_command(opt, &conn)?;
+    Ok(())
 }
 
 #[derive(StructOpt, Debug)]
@@ -82,7 +84,7 @@ enum FriendGrow {
     ListUpcoming {},
 }
 
-fn execute_command(opt: FriendGrow, conn: &SqliteConnection) {
+fn execute_command(opt: FriendGrow, conn: &SqliteConnection) -> Result<()> {
     match opt {
         FriendGrow::ListFriends {} => list_friends(conn),
         FriendGrow::ShowFriend { name } => show_friend(name, conn),
@@ -96,5 +98,5 @@ fn execute_command(opt: FriendGrow, conn: &SqliteConnection) {
         FriendGrow::SetFrequency { name, freq_weeks } => set_frequency(name, freq_weeks, conn),
         FriendGrow::RecordSeen { name, date } => record_seen(name, date, conn),
         FriendGrow::ListUpcoming {} => list_upcoming(conn),
-    };
+    }
 }

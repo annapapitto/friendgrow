@@ -1,4 +1,5 @@
 use crate::models::*;
+use anyhow::Result;
 use chrono::NaiveDate;
 use core::panic;
 use prettytable::{format, Row, Table};
@@ -21,14 +22,11 @@ impl UpcomingFriends {
         }
     }
 
-    pub fn push(&mut self, friend: Friend, today: NaiveDate) {
+    pub fn push(&mut self, friend: Friend, today: NaiveDate) -> Result<()> {
         match friend.days_until_due(today) {
-            Some(days_until_due) => {
-                self.push_seen(friend, days_until_due);
-            }
-            None => {
-                self.push_never_seen(friend);
-            }
+            Ok(Some(days_until_due)) => Ok(self.push_seen(friend, days_until_due)),
+            Ok(None) => Ok(self.push_never_seen(friend)),
+            Err(e) => Err(e),
         }
     }
 

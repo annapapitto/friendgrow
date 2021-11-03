@@ -1,5 +1,6 @@
 use crate::models::*;
 use crate::schema::friends::{self, dsl::*};
+use anyhow::{Context, Result};
 pub use diesel::prelude::SqliteConnection;
 use diesel::prelude::*;
 use dotenv::dotenv;
@@ -7,11 +8,11 @@ use std::env;
 
 const DB_KEY: &str = "DATABASE_URL";
 
-pub fn connect() -> ConnectionResult<SqliteConnection> {
+pub fn connect() -> Result<SqliteConnection> {
     dotenv().ok();
 
-    let database_url = env::var(DB_KEY).expect("DATABASE_URL must be set");
-    SqliteConnection::establish(&database_url)
+    let database_url = env::var(DB_KEY).context("DATABASE_URL must be set in the environment")?;
+    SqliteConnection::establish(&database_url).context("Failed to establish connection to database")
 }
 
 pub fn load_all_friends(conn: &SqliteConnection) -> QueryResult<Vec<Friend>> {
