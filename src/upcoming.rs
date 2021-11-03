@@ -1,6 +1,7 @@
 use crate::models::*;
 use chrono::NaiveDate;
 use core::panic;
+use prettytable::{format, Row, Table};
 use priority_queue::PriorityQueue;
 
 const UP_SOON_CUTOFF_DAYS: i64 = 20;
@@ -48,20 +49,21 @@ impl UpcomingFriends {
     }
 
     pub fn print(&self) {
-        if !self.never_seen.is_empty() {
-            println!("\nNEVER SEEN");
-            for friend in &self.never_seen {
-                println!("{}", friend);
-            }
+        let mut table = Table::new();
+        table.set_format(*format::consts::FORMAT_NO_LINESEP_WITH_TITLE);
+        table.set_titles(Friend::get_table_titles(true));
+
+        for friend in &self.never_seen {
+            table.add_row(friend.get_table_row());
         }
-        if !self.overdue.is_empty() {
-            println!("\nOVERDUE");
-            self.overdue.print_due_days();
+        for r in self.overdue.get_table_rows() {
+            table.add_row(r);
         }
-        if !self.up_soon.is_empty() {
-            println!("\nUP SOON");
-            self.up_soon.print_due_days();
+        for r in self.up_soon.get_table_rows() {
+            table.add_row(r);
         }
+
+        table.printstd();
     }
 }
 
@@ -99,17 +101,23 @@ impl FriendQueue {
         self.queue_by_days.is_empty()
     }
 
-    fn print_due_days(&self) {
+    fn get_table_rows(&self) -> Vec<Row> {
+        let mut rows = vec![];
+        if self.is_empty() {
+            return rows;
+        }
+
         for (friend, due_in_days) in self.queue_by_days.clone().into_sorted_iter() {
             let due_on = match self.overdue {
                 true => {
-                    format!("Due {} days ago", due_in_days)
+                    format!("{} days ago", due_in_days)
                 }
                 false => {
-                    format!("Due in {} days", -due_in_days)
+                    format!("In {} days", -due_in_days)
                 }
             };
-            println!("{}\t{}", due_on, friend);
+            rows.push(friend.get_table_row_with_due(&due_on));
         }
+        rows
     }
 }

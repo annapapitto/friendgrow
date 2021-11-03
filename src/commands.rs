@@ -2,14 +2,21 @@ use crate::dates;
 use crate::db::{self, SqliteConnection};
 use crate::models::*;
 use crate::upcoming::UpcomingFriends;
+use prettytable::{format, Table};
 
 const DEFAULT_FREQ_WEEKS: i32 = 10;
 
 pub fn list_friends(conn: &SqliteConnection) {
     let all_friends = db::load_all_friends(conn).expect("Error getting friends");
+    let mut table = Table::new();
+    table.set_format(*format::consts::FORMAT_NO_LINESEP_WITH_TITLE);
+    table.set_titles(Friend::get_table_titles(false));
+
     for friend in all_friends {
-        println!("{}", friend);
+        table.add_row(friend.get_table_row());
     }
+
+    table.printstd();
 }
 
 pub fn show_friend(name: String, conn: &SqliteConnection) {

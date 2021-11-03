@@ -1,4 +1,4 @@
-table! {
+diesel::table! {
     friends (id) {
         id -> Integer,
         name -> Text,

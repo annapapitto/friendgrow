@@ -1,6 +1,7 @@
 use crate::dates;
 use crate::schema::friends;
 use chrono::{Duration, NaiveDate};
+use prettytable::{Cell, Row};
 use std::fmt;
 
 #[derive(Identifiable, Queryable, Clone, Hash, PartialEq, Eq)]
@@ -22,6 +23,29 @@ impl Friend {
                 .expect("Error calculating when to next see");
             (next_due - today).num_days()
         })
+    }
+
+    pub fn get_table_row(&self) -> Row {
+        row![
+            self.name,
+            self.location,
+            format!("{} weeks", self.freq_weeks),
+            self.last_seen.clone().unwrap_or("Never".to_string()),
+        ]
+    }
+
+    pub fn get_table_row_with_due(&self, due_on: &str) -> Row {
+        let mut r = self.get_table_row();
+        r.add_cell(Cell::new(due_on));
+        r
+    }
+
+    pub fn get_table_titles(with_due: bool) -> Row {
+        let mut r = row!["Name", "Location", "Frequency", "Last seen"];
+        if with_due {
+            r.add_cell(Cell::new("Due"));
+        }
+        r
     }
 }
 
