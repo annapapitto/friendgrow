@@ -55,6 +55,11 @@ pub fn remove_friend(name: String, conn: &SqliteConnection) -> Result<()> {
     Ok(())
 }
 
+pub fn set_name(curr_name: String, new_name: String, conn: &SqliteConnection) -> Result<()> {
+    db::update_name(&curr_name, &new_name, conn).context("Failed to set name")?;
+    show_friend(new_name, conn)
+}
+
 pub fn set_location(name: String, location: String, conn: &SqliteConnection) -> Result<()> {
     db::update_location(&name, location, conn).context("Failed to set location")?;
     show_friend(name, conn)
