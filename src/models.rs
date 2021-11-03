@@ -54,12 +54,13 @@ impl fmt::Display for Friend {
         let seen_str: String = self
             .last_seen
             .clone()
-            .map_or("Never seen".to_string(), |last| {
-                format!("Last seen on {}", last)
+            .map_or("not seen yet".to_string(), |last| {
+                format!("last seen on {}", last)
             });
         write!(
             f,
-            "{}\tLocated in {}\tEvery {} weeks\t{}",
+            //"{} is located in {} and was {}. You like to see {} every {} weeks.",
+            "{} ({})\nEvery {} weeks, {}",
             self.name, self.location, self.freq_weeks, seen_str
         )
     }
