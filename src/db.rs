@@ -16,7 +16,7 @@ pub fn connect() -> Result<SqliteConnection> {
 }
 
 pub fn load_all_friends(conn: &SqliteConnection) -> QueryResult<Vec<Friend>> {
-    friends::table.load::<Friend>(conn)
+    friends::table.order_by(freq_weeks).load::<Friend>(conn)
 }
 
 pub fn load_friend(friend_name: &String, conn: &SqliteConnection) -> QueryResult<Friend> {
