@@ -60,7 +60,7 @@ impl fmt::Display for Friend {
         write!(
             f,
             //"{} is located in {} and was {}. You like to see {} every {} weeks.",
-            "{} ({})\nEvery {} weeks, {}",
+            "{} ({}) every {} weeks, {}",
             self.name, self.location, self.freq_weeks, seen_str
         )
     }
