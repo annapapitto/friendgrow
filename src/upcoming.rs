@@ -14,6 +14,16 @@ pub enum DueDays {
     DueIn(u16),
 }
 
+impl DueDays {
+    pub fn display_some(&self) -> Option<String> {
+        match self {
+            DueDays::DueIn(d) => Some(format!("in {} days", d)),
+            DueDays::OverDue(d) => Some(format!("{} days ago", d)),
+            DueDays::NotSeen => None,
+        }
+    }
+}
+
 impl Ord for DueDays {
     fn cmp(&self, other: &Self) -> Ordering {
         use DueDays::*;
@@ -124,5 +134,26 @@ mod test {
         assert_eq!(queue_by_due_days.pop().unwrap().1, DueDays::DueIn(16));
 
         assert_eq!(queue_by_due_days.pop(), None);
+    }
+
+    #[test]
+    fn test_display_due_on() {
+        assert_eq!(DueDays::NotSeen.display_some(), None);
+        assert_eq!(
+            DueDays::OverDue(0).display_some(),
+            Some("0 days ago".to_owned())
+        );
+        assert_eq!(
+            DueDays::OverDue(5).display_some(),
+            Some("5 days ago".to_owned())
+        );
+        assert_eq!(
+            DueDays::DueIn(0).display_some(),
+            Some("in 0 days".to_owned())
+        );
+        assert_eq!(
+            DueDays::DueIn(24).display_some(),
+            Some("in 24 days".to_owned())
+        );
     }
 }

@@ -25,14 +25,6 @@ impl Friend {
         r
     }
 
-    fn display_due_on(due_in_days: DueDays) -> Option<String> {
-        match due_in_days {
-            DueDays::DueIn(d) => Some(format!("in {} days", d)),
-            DueDays::OverDue(d) => Some(format!("{} days ago", d)),
-            DueDays::NotSeen => None,
-        }
-    }
-
     pub fn days_until_due(&self, today: NaiveDate) -> Result<DueDays> {
         if self.last_seen.is_none() {
             return Ok(DueDays::NotSeen);
@@ -64,7 +56,7 @@ impl Friend {
     }
 
     pub fn get_table_row_with_due(&self, due_in_days: DueDays) -> Row {
-        let due_on = Self::display_due_on(due_in_days).unwrap_or_default();
+        let due_on = due_in_days.display_some().unwrap_or_default();
         let mut r = self.get_table_row();
         r.add_cell(Cell::new(&due_on));
         r
@@ -83,8 +75,9 @@ impl fmt::Display for Friend {
         let days_until_due = self
             .days_until_due(dates::local_today())
             .map_err(|_| fmt::Error)?;
-        let next_due = Self::display_due_on(days_until_due);
-        next_due.map(|n| seen_str.push_str(&format!(", see next {}", n)));
+        days_until_due
+            .display_some()
+            .map(|n| seen_str.push_str(&format!(", see next {}", n)));
 
         write!(
             f,
@@ -146,26 +139,5 @@ mod tests {
         };
 
         assert_eq!(friend.days_until_due(today).unwrap(), DueDays::OverDue(5));
-    }
-
-    #[test]
-    fn test_display_due_on() {
-        assert_eq!(Friend::display_due_on(DueDays::NotSeen), None);
-        assert_eq!(
-            Friend::display_due_on(DueDays::OverDue(0)),
-            Some("0 days ago".to_owned())
-        );
-        assert_eq!(
-            Friend::display_due_on(DueDays::OverDue(5)),
-            Some("5 days ago".to_owned())
-        );
-        assert_eq!(
-            Friend::display_due_on(DueDays::DueIn(0)),
-            Some("in 0 days".to_owned())
-        );
-        assert_eq!(
-            Friend::display_due_on(DueDays::DueIn(24)),
-            Some("in 24 days".to_owned())
-        );
     }
 }
