@@ -51,15 +51,21 @@ impl Friend {
 
 impl fmt::Display for Friend {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let seen_str: String = self
+        let mut seen_str: String = self
             .last_seen
             .clone()
             .map_or("not seen yet".to_string(), |last| {
                 format!("last seen on {}", last)
             });
+
+        let days_until_due = self
+            .days_until_due(dates::local_today())
+            .map_err(|_| fmt::Error)?;
+        let next_due = Self::display_due_on(days_until_due);
+        next_due.map(|n| seen_str.push_str(&format!(", see next {}", n)));
+
         write!(
             f,
-            //"{} is located in {} and was {}. You like to see {} every {} weeks.",
             "{} ({}) every {} weeks, {}",
             self.name, self.location, self.freq_weeks, seen_str
         )
