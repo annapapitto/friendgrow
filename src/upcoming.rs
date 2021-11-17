@@ -78,3 +78,51 @@ impl UpcomingFriends {
         table.printstd();
     }
 }
+
+#[cfg(test)]
+mod test {
+    use priority_queue::PriorityQueue;
+
+    use super::DueDays;
+
+    #[test]
+    fn test_queue_order() {
+        let mut queue_by_due_days: PriorityQueue<&str, DueDays> = PriorityQueue::new();
+
+        queue_by_due_days.push("first", DueDays::NotSeen);
+        queue_by_due_days.push("eighth", DueDays::DueIn(16));
+        queue_by_due_days.push("ninth", DueDays::DueIn(16));
+        queue_by_due_days.push("fourth", DueDays::OverDue(5));
+        queue_by_due_days.push("second", DueDays::NotSeen);
+        queue_by_due_days.push("seventh", DueDays::DueIn(8));
+        queue_by_due_days.push("fifth", DueDays::OverDue(0));
+        queue_by_due_days.push("third", DueDays::OverDue(10));
+        queue_by_due_days.push("sixth", DueDays::DueIn(0));
+
+        assert_eq!(queue_by_due_days.pop().unwrap().1, DueDays::NotSeen);
+        assert_eq!(queue_by_due_days.pop().unwrap().1, DueDays::NotSeen);
+
+        assert_eq!(
+            queue_by_due_days.pop(),
+            Some(("third", DueDays::OverDue(10)))
+        );
+        assert_eq!(
+            queue_by_due_days.pop(),
+            Some(("fourth", DueDays::OverDue(5)))
+        );
+        assert_eq!(
+            queue_by_due_days.pop(),
+            Some(("fifth", DueDays::OverDue(0)))
+        );
+        assert_eq!(queue_by_due_days.pop(), Some(("sixth", DueDays::DueIn(0))));
+        assert_eq!(
+            queue_by_due_days.pop(),
+            Some(("seventh", DueDays::DueIn(8)))
+        );
+
+        assert_eq!(queue_by_due_days.pop().unwrap().1, DueDays::DueIn(16));
+        assert_eq!(queue_by_due_days.pop().unwrap().1, DueDays::DueIn(16));
+
+        assert_eq!(queue_by_due_days.pop(), None);
+    }
+}

@@ -147,4 +147,25 @@ mod tests {
 
         assert_eq!(friend.days_until_due(today).unwrap(), DueDays::OverDue(5));
     }
+
+    #[test]
+    fn test_display_due_on() {
+        assert_eq!(Friend::display_due_on(DueDays::NotSeen), None);
+        assert_eq!(
+            Friend::display_due_on(DueDays::OverDue(0)),
+            Some("0 days ago".to_owned())
+        );
+        assert_eq!(
+            Friend::display_due_on(DueDays::OverDue(5)),
+            Some("5 days ago".to_owned())
+        );
+        assert_eq!(
+            Friend::display_due_on(DueDays::DueIn(0)),
+            Some("in 0 days".to_owned())
+        );
+        assert_eq!(
+            Friend::display_due_on(DueDays::DueIn(24)),
+            Some("in 24 days".to_owned())
+        );
+    }
 }
