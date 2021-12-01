@@ -1,5 +1,6 @@
 use crate::models::*;
 use crate::schema::friends::{self, dsl::*};
+use crate::ListOrderBy;
 use anyhow::{Context, Result};
 pub use diesel::prelude::SqliteConnection;
 use diesel::prelude::*;
@@ -18,7 +19,19 @@ pub fn connect() -> Result<SqliteConnection> {
 }
 
 pub fn load_all_friends(conn: &SqliteConnection) -> QueryResult<Vec<Friend>> {
-    friends::table.order_by(freq_weeks).load::<Friend>(conn)
+    friends::table.load::<Friend>(conn)
+}
+
+pub fn load_all_friends_ordered(
+    order_by: ListOrderBy,
+    conn: &SqliteConnection,
+) -> QueryResult<Vec<Friend>> {
+    match order_by {
+        ListOrderBy::Frequency => friends::table.order_by(freq_weeks).load::<Friend>(conn),
+        ListOrderBy::LastSeen => friends::table
+            .order_by(last_seen.desc())
+            .load::<Friend>(conn),
+    }
 }
 
 pub fn load_friend(friend_name: &String, conn: &SqliteConnection) -> QueryResult<Friend> {

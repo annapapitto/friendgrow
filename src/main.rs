@@ -16,9 +16,19 @@ use crate::commands::*;
 use anyhow::{Context, Result};
 use db::SqliteConnection;
 use diesel_migrations::embed_migrations;
+use std::str::FromStr;
 use structopt::StructOpt;
+use strum::{Display, EnumIter, EnumString, EnumVariantNames, IntoStaticStr, VariantNames};
 
 embed_migrations!();
+
+#[derive(Debug, Display, EnumIter, EnumString, EnumVariantNames, IntoStaticStr)]
+pub enum ListOrderBy {
+    #[strum(serialize = "freq")]
+    Frequency,
+    #[strum(serialize = "last")]
+    LastSeen,
+}
 
 fn main() -> Result<()> {
     let opt = FriendGrow::from_args();
@@ -39,7 +49,13 @@ fn main() -> Result<()> {
 )]
 enum FriendGrow {
     #[structopt(name = "list", about = "List all of your friends")]
-    ListFriends {},
+    ListFriends {
+        #[structopt(
+            short, help = "Which column to order the list by",
+            possible_values=ListOrderBy::VARIANTS, default_value=ListOrderBy::Frequency.into()
+        )]
+        order_by: String,
+    },
 
     #[structopt(name = "show", about = "Show a friend")]
     ShowFriend { name: String },
@@ -93,7 +109,9 @@ enum FriendGrow {
 
 fn execute_command(opt: FriendGrow, conn: &SqliteConnection) -> Result<()> {
     match opt {
-        FriendGrow::ListFriends {} => list_friends(conn),
+        FriendGrow::ListFriends { order_by } => {
+            list_friends(ListOrderBy::from_str(&order_by)?, conn)
+        }
         FriendGrow::ShowFriend { name } => show_friend(name, conn),
         FriendGrow::AddFriend {
             name,

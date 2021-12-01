@@ -1,14 +1,15 @@
-use crate::dates;
 use crate::db::{self, SqliteConnection};
 use crate::models::*;
 use crate::upcoming::UpcomingFriends;
+use crate::{dates, ListOrderBy};
 use anyhow::{Context, Result};
 use prettytable::{format, Table};
 
 const DEFAULT_FREQ_WEEKS: i32 = 10;
 
-pub fn list_friends(conn: &SqliteConnection) -> Result<()> {
-    let all_friends = db::load_all_friends(conn).context("Failed to load friends")?;
+pub fn list_friends(order_by: ListOrderBy, conn: &SqliteConnection) -> Result<()> {
+    let all_friends =
+        db::load_all_friends_ordered(order_by.into(), conn).context("Failed to load friends")?;
     if all_friends.is_empty() {
         return Err(anyhow::anyhow!(
             "No friends yet. Add some with the `add` command."
