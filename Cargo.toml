@@ -10,5 +10,6 @@ diesel = { version = "1.4.8", features = [ "sqlite" ] }
 diesel_migrations = "1.4.0"
 dotenv = "0.15.0"
 structopt = "0.3.23"
+strum = { version = "0.23.0", features = ["derive"] }
 priority-queue = "1.2.0"
 prettytable-rs = "0.8.0"
