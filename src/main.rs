@@ -55,6 +55,9 @@ enum FriendGrow {
             possible_values=ListOrderBy::VARIANTS, default_value=ListOrderBy::Frequency.into()
         )]
         order_by: String,
+
+        #[structopt(short, help = "How many friends to list")]
+        number: Option<i64>,
     },
 
     #[structopt(name = "show", about = "Show a friend")]
@@ -77,6 +80,7 @@ enum FriendGrow {
     #[structopt(name = "set-name", about = "Set the name of a friend")]
     SetName {
         name: String,
+
         #[structopt(help = "Their new name")]
         new_name: String,
     },
@@ -84,6 +88,7 @@ enum FriendGrow {
     #[structopt(name = "set-loc", about = "Set where a friend is located")]
     SetLocation {
         name: String,
+
         #[structopt(help = "Where they are located")]
         location: String,
     },
@@ -91,6 +96,7 @@ enum FriendGrow {
     #[structopt(name = "set-freq", about = "Set how often to see a friend")]
     SetFrequency {
         name: String,
+
         #[structopt(help = "How often to see them, in weeks")]
         freq_weeks: i32,
     },
@@ -109,8 +115,8 @@ enum FriendGrow {
 
 fn execute_command(opt: FriendGrow, conn: &SqliteConnection) -> Result<()> {
     match opt {
-        FriendGrow::ListFriends { order_by } => {
-            list_friends(ListOrderBy::from_str(&order_by)?, conn)
+        FriendGrow::ListFriends { order_by, number } => {
+            list_friends(ListOrderBy::from_str(&order_by)?, number, conn)
         }
         FriendGrow::ShowFriend { name } => show_friend(name, conn),
         FriendGrow::AddFriend {

@@ -24,13 +24,24 @@ pub fn load_all_friends(conn: &SqliteConnection) -> QueryResult<Vec<Friend>> {
 
 pub fn load_all_friends_ordered(
     order_by: ListOrderBy,
+    number: Option<i64>,
     conn: &SqliteConnection,
 ) -> QueryResult<Vec<Friend>> {
     match order_by {
-        ListOrderBy::Frequency => friends::table.order_by(freq_weeks).load::<Friend>(conn),
-        ListOrderBy::LastSeen => friends::table
-            .order_by(last_seen.desc())
-            .load::<Friend>(conn),
+        ListOrderBy::Frequency => {
+            let q = friends::table.order_by(freq_weeks);
+            match number {
+                Some(number) => q.limit(number).load::<Friend>(conn),
+                None => q.load::<Friend>(conn),
+            }
+        }
+        ListOrderBy::LastSeen => {
+            let q = friends::table.order_by(last_seen.desc());
+            match number {
+                Some(number) => q.limit(number).load::<Friend>(conn),
+                None => q.load::<Friend>(conn),
+            }
+        }
     }
 }
 

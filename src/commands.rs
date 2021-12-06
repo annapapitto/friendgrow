@@ -7,9 +7,13 @@ use prettytable::{format, Table};
 
 const DEFAULT_FREQ_WEEKS: i32 = 10;
 
-pub fn list_friends(order_by: ListOrderBy, conn: &SqliteConnection) -> Result<()> {
-    let all_friends =
-        db::load_all_friends_ordered(order_by.into(), conn).context("Failed to load friends")?;
+pub fn list_friends(
+    order_by: ListOrderBy,
+    number: Option<i64>,
+    conn: &SqliteConnection,
+) -> Result<()> {
+    let all_friends = db::load_all_friends_ordered(order_by.into(), number, conn)
+        .context("Failed to load friends")?;
     if all_friends.is_empty() {
         return Err(anyhow::anyhow!(
             "No friends yet. Add some with the `add` command."
