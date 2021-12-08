@@ -5,7 +5,7 @@ use prettytable::{format, Table};
 use priority_queue::PriorityQueue;
 use std::cmp::Ordering;
 
-const UP_SOON_CUTOFF_DAYS: u16 = 15;
+const UP_SOON_CUTOFF_DAYS: u16 = 10;
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum DueDays {
