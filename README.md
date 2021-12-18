@@ -6,7 +6,7 @@
 
 ### Install
 - Download the latest binary using `cargo install friendgrow`
-- Choose a database location and set that in your environment in your preferred way, e.g. `export DATABASE_URL=~/.friendgrow.db >> .bashrc`.
+- Choose a database location and set that in your environment in your preferred way, e.g. `export FRIENDGROW_DB=~/.friendgrow.db >> .bashrc`
 
 ### Add friends
 ```
@@ -39,13 +39,11 @@ Sam (The Shire) every 3 weeks, last seen on 2021-12-02, see next in 6 days
 - Fork this repository
 - Make sure you've installed rust and cargo
 - Try out your local fork using `cargo run -- [friendgrow args]`
-- To use a different test database file, temporarily set the location using `export DATABASE_URL=./test-friendgrow.db`
+- To use a different test database file, temporarily set the location using `export FRIENDGROW_DB=./test-friendgrow.db`
 
 ### TODOs
 
 Anyone can feel free to help with these!
 
-- Rename DATABASE_URL to be more unique
-- Change error message for DATABASE_URL not found to use profile
 - Add documentation comments
 - When friend not found, suggest similar names from DB

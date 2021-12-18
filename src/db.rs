@@ -7,13 +7,13 @@ use diesel::prelude::*;
 use dotenv::dotenv;
 use std::env;
 
-const DB_KEY: &str = "DATABASE_URL";
+const DB_KEY: &str = "FRIENDGROW_DB";
 
 pub fn connect() -> Result<SqliteConnection> {
     dotenv().ok();
 
     let database_url = env::var(DB_KEY).context(
-        "DATABASE_URL must be set in the environment, e.g. 'echo DATABASE_URL=friends.db >> .env'",
+        "FRIENDGROW_DB must be set in the environment, e.g. 'export FRIENDGROW_DB=~/.friendgrow.db'",
     )?;
     SqliteConnection::establish(&database_url).context("Failed to establish connection to database")
 }
