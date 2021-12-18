@@ -2,7 +2,7 @@
 name = "friendgrow"
 description = "Grow your friendships by tracking which friends to see soon"
 license = "GPL-3.0"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2018"
 
 [dependencies]
