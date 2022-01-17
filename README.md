@@ -47,3 +47,7 @@ Anyone can feel free to help with these!
 
 - Add documentation comments
 - When friend not found, suggest similar names from DB
+- Replace 'see in x days' with 'see on m/d'
+- Record dates with default year of current year
+- Record dates with keywords like today, yesterday, (last) Tuesday
+
