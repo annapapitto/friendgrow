@@ -44,7 +44,7 @@ fn main() -> Result<()> {
 #[structopt(
     name = "FriendGrow",
     about = "Let your friendships grow",
-    version = "0.1",
+    version = "0.2.1",
     author = "annapapitto"
 )]
 enum FriendGrow {
